@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NRPPZW LAB2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+<div class="grid min-h-screen place-items-center">
+    <div class="w-11/12 p-12 bg-white sm:w-8/12 md:w-1/2 lg:w-5/12">
+        <h1 class="text-xl font-semibold">Welcome to NRPPZW2, <span class="font-normal">let's exploit vulnerabilites</span>
+        </h1>
+        {% with msg = get_flashed_messages(with_categories=True) %}
+            {% if msg %}
+                {% for cat, mes in msg %}
+                    {% set alert_class = 'green' if cat == 'info' else 'yellow' %}
+                    <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-{{ alert_class }}-50 dark:bg-gray-800 dark:text-{{ alert_class }}-400"
+                         role="alert">
+                        <span class="font-bold">{{ cat }}</span> - <span>{{ mes }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="mt-6">
+            <label class="text-xs font-semibold text-gray-600 uppercase">XSS
+                Vulnerability {{ "Enabled" if xss_enabled else "Disabled" }}</label>
+            <button
+                    onclick="window.location.href = '{{ url_for('toggle_xss') }}';"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Toggle
+            </button><br/>
+            {% if xss_enabled %}
+                <p class="text-xs font-semibold text-gray-600 uppercase">The status of second user exploited XSS when opening this page</p>
+            {% endif %}
+            <label class="text-xs font-semibold text-gray-600 uppercase">Broken Access Control
+                Vulnerability {{ "Enabled" if broken_access_control_enabled else "Disabled" }}</label>
+            <button
+                    onclick="window.location.href = '{{ url_for('toggle_broken_access_control') }}';"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Toggle
+            </button><br/>
+            {% if broken_access_control_enabled %}
+                <p class="text-xs font-semibold text-gray-600 uppercase">You can view other users secret notes by incrementing id in url</p>
+            {% endif %}
+            <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+            <label class="block text-xs font-semibold text-gray-600 uppercase">App users statuses:</label>
+            {% for user in users %}
+                <div class="p-4 mb-4 text-sm text-white rounded-lg bg-{{ user.status }}-50 dark:bg-gray-800 dark:text-{{ user.status }}-400"
+                     role="alert">
+                    <span class="font-bold">{{ user.username }}</span> - <span>
+                        {% if xss_enabled %}
+                            {{ user.status | safe }}
+                        {% else %}
+                            {{ user.status }}
+                        {% endif %}
+                        </span>
+                </div>
+            {% endfor %}
+            <button
+                    onclick="window.location.href = '{{ url_for('logout') }}';"
+                    class="w-full py-3 mt-6 font-medium tracking-widest text-white uppercase bg-black shadow-lg focus:outline-none hover:bg-gray-900 hover:shadow-none">
+                Log out
+            </button>
+            <button
+                    onclick="window.location.href = '{{ url_for('profile', user_id=current_user.id) }}';"
+                    class="w-full py-3 mt-6 font-medium tracking-widest text-black uppercase bg-gray-200 shadow-lg focus:outline-none hover:bg-gray-500 hover:shadow-none">
+                View your secret note
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
